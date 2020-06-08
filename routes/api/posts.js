@@ -1,10 +1,34 @@
 const express = require("express");
 const router = express.Router();
+const { check, validationResult } = require("express-validator");
+const auth = require("../../middleware/auth");
+const Post = require("../../models/Post");
+const User = require("../../models/User");
+// @route       POST api/post
+// @desc        Create a Post
+// @access      private
 
-// @route       GET api/post
-// @desc        test  route
-// @access      Public
+router.post(
+  "/",
+  [
+    auth,
+    [
+      check("title", "The title can't be empty.").not().isEmpty(),
+      check("body", "body is required").not().isEmpty(),
+      check("photo", "You must select an image.").notEmpty(),
+    ],
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    console.log(req.body);
+    if (!errors.isEmpty()) {
+      return res.status(400).jsonp(errors.array());
+    } else {
+      res.send({});
+    } //
 
-router.get("/", (req, res) => res.send("Post route"));
+    const user = await User.findById(req.user.id).select("-password");
+  }
+);
 
 module.exports = router;

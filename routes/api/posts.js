@@ -4,10 +4,10 @@ const { check, validationResult } = require("express-validator");
 const auth = require("../../middleware/auth");
 const Post = require("../../models/Post");
 const User = require("../../models/User");
+
 // @route       POST api/posts
 // @desc        Create a Post
 // @access      private
-
 router.post(
   "/",
   [
@@ -44,42 +44,36 @@ router.post(
   }
 );
 
-// router.post(
-//   "/",
-//   [
-//     auth,
-//     [
-//       check("title", "Title is required").not().isEmpty(),
-//       //   check("hero", "Hero is required").not().isEmpty(),
-//       //   check("photo", "You must select an image.").notEmpty(),
-//     ],
-//   ],
-//   async (req, res) => {
-//     const errors = validationResult(req);
-//     console.log(req.body);
+// @route       GET api/posts
+// @desc        Get All Post
+// @access      private
+router.get("/", auth, async (req, res) => {
+  try {
+    const posts = await Post.find().sort({ date: -1 });
+    res.json(posts);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+// @route       GET api/posts
+// @desc        Get  Post by posts/:post_id
+// @access      private
+/**/
 
-//     if (!errors.isEmpty()) {
-//       return res.status(400).jsonp(errors.array());
-//     } else {
-//       res.send({ errors });
-//     } //
-
-//     try {
-//       const user = await User.findById(req.user.id).select("-password");
-//       const newPost = new Post({
-//         title: req.body.title,
-//         hero: req.body.hero,
-//         user: user.id,
-//         postedBy: req.user,
-//       });
-//       //
-//       const post = await newPost.save();
-//       res.json(post);
-//     } catch (err) {
-//       console.error(err.massage);
-//       //   res.status(500).send("Server Error...");
-//     }
-//   }
-// );
+//
+// @route       GET api/posts/myposts
+// @desc        Get All Post from a special user
+// @access      private
+router.get("/myposts", auth, async (req, res) => {
+  try {
+    const myposts = await Post.find({ user: req.user.id });
+    console.log(myposts);
+    res.json(myposts);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
 
 module.exports = router;
